@@ -17,9 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from games import views
+from django.urls import include, path
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('game/', views.game, name='game'),
+    path('game/<int:id>/', views.game, name='game'),
     path('check_word/', views.check_word, name='check_word'),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('register/', views.register, name='register'),
+    path('accounts/profile/<int:id>/', views.profile, name='profile'),
 ]

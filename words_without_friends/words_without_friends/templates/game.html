@@ -5,16 +5,22 @@
     <script>
         var timeLeft = 60;
         var words = [];
+        var score = 0;
         var timerId;
 
         $(document).ready(function() {
             timerId = setInterval(countdown, 1000);
+            $('#add-word-btn').click(function(e) {
+                e.preventDefault();
+                addWord();
+            });
         });
 
         function countdown() {
             if (timeLeft == 0) {
                 clearTimeout(timerId);
-                $('#words').val(words.join(','));
+                $('#words').val(words.join(', '));
+                $('#score').val(score);
                 $('form').submit();
             } else {
                 $('#timer').text(timeLeft + ' seconds remaining');
@@ -28,13 +34,14 @@
                 url: "{% url 'check_word' %}",
                 data: {
                     'word': word,
-                    'letters': "{{letters}}",
                 },
                 dataType: 'json',
                 success: function (data) {
                     if (data.is_valid) {
                         words.push(word);
                         $('#word').val("");
+                        score += word.length;
+                        $('#score_display').text("Score: " + score);
                     } else {
                         alert("Invalid word or letter used more than once!");
                     }
@@ -45,11 +52,15 @@
 </head>
   <body>
     <h1>Words Without Friends</h1>
+    <p id="timer">60 seconds remaining</p>
+    <p id="score_display">Score: 0</p>
     <p>Use these letters to create as many words as possible: {{letters}}</p>
+    <input id="word" type="text" placeholder="Enter a word here">
+    <button id="add-word-btn">Add Word</button>
     <form method="post">
       {% csrf_token %}
-      <input type="text" name="words" placeholder="Enter words here">
-      <button type="submit">Submit</button>
+      <input id="words" type="hidden" name="words">
+      <input id="score" type="hidden" name="score">
     </form>
   </body>
 </html>
