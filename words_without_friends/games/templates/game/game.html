@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        var timeLeft = 60;
+        var words = [];
+        var timerId;
+
+        $(document).ready(function() {
+            timerId = setInterval(countdown, 1000);
+        });
+
+        function countdown() {
+            if (timeLeft == 0) {
+                clearTimeout(timerId);
+                $('#words').val(words.join(','));
+                $('form').submit();
+            } else {
+                $('#timer').text(timeLeft + ' seconds remaining');
+                timeLeft--;
+            }
+        }
+
+        function addWord() {
+            var word = $('#word').val();
+            $.ajax({
+                url: "{% url 'check_word' %}",
+                data: {
+                    'word': word,
+                    'letters': "{{letters}}",
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.is_valid) {
+                        words.push(word);
+                        $('#word').val("");
+                    } else {
+                        alert("Invalid word or letter used more than once!");
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+  <body>
+    <h1>Words Without Friends</h1>
+    <p>Use these letters to create as many words as possible: {{letters}}</p>
+    <form method="post">
+      {% csrf_token %}
+      <input type="text" name="words" placeholder="Enter words here">
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>
